@@ -60,3 +60,10 @@ def update_patient(id: str, patient: Patient):
 def delete_patient(id: str):
     patient_collection.delete_one({"_id": ObjectId(id)})
     return {"message": "Patient deleted successfully"}
+
+@app.get("/")
+def home():
+    return {
+        "status": "Patient Service is running",
+        "docs": "/docs"
+    }
