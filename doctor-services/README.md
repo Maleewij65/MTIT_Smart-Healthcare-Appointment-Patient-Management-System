@@ -1,12 +1,12 @@
-# Appointment Service
-### Smart Healthcare Appointment & Patient Management System
+# Doctor Service
+### Smart Healthcare Doctor Service
 **IT4020 – Modern Topics in IT | Assignment 2**
 
 ---
 
 ## What this service does
-Manages appointments between patients and doctors.
-Runs on **port 8003** | Swagger UI at **http://localhost:8003/docs**
+Manages doctors and availability.
+Runs on **port 8002** | Swagger UI at **http://localhost:8002/docs**
 
 ---
 
@@ -15,9 +15,9 @@ Runs on **port 8003** | Swagger UI at **http://localhost:8003/docs**
 ### Step 1 — Open VS Code terminal
 Press `` Ctrl + ` `` to open the terminal inside VS Code.
 
-### Step 2 — Go into the appointment-service folder
+### Step 2 — Go into the doctor-services folder
 ```
-cd appointment-service
+cd doctor-services
 ```
 
 ### Step 3 — Install dependencies
@@ -32,41 +32,40 @@ python main.py
 
 You should see:
 ```
-INFO:     Uvicorn running on http://0.0.0.0:8003 (Press CTRL+C to quit)
+INFO:     Uvicorn running on http://0.0.0.0:8002 (Press CTRL+C to quit)
 ```
 
 ### Step 5 — Open Swagger UI
 Go to your browser and open:
 ```
-http://localhost:8003/docs
+http://localhost:8002/docs
 ```
-This is where you take screenshots for the slides!
 
 ---
 
 ## API Endpoints
 
-| Method | Endpoint                            | Description                        |
-|--------|-------------------------------------|------------------------------------|
-| POST   | /appointments                       | Book a new appointment             |
-| GET    | /appointments                       | List all appointments              |
-| GET    | /appointments/{id}                  | Get one appointment by ID          |
-| GET    | /appointments/patient/{patient_id}  | All appointments for a patient     |
-| GET    | /appointments/doctor/{doctor_id}    | All appointments for a doctor      |
-| PUT    | /appointments/{id}                  | Reschedule / update appointment    |
-| DELETE | /appointments/{id}                  | Cancel / delete appointment        |
+| Method | Endpoint               | Description                    |
+|--------|------------------------|--------------------------------|
+| POST   | /doctors               | Add a new doctor               |
+| GET    | /doctors               | List all doctors               |
+| GET    | /doctors/{id}          | Get one doctor by ID           |
+| PUT    | /doctors/{id}          | Update doctor details          |
+| DELETE | /doctors/{id}          | Delete a doctor                |
 
 ---
 
-## Sample request body for POST /appointments
+## Sample request body for POST /doctors
 ```json
 {
-  "patient_id": "p001",
-  "doctor_id": "d001",
-  "appointment_date": "2026-04-10",
-  "appointment_time": "10:30",
-  "reason": "Routine check-up",
-  "status": "scheduled"
+  "full_name": "Dr. Nimal Perera",
+  "specialization": "Cardiology",
+  "email": "nimal.perera@example.com",
+  "phone": "0771234567",
+  "license_number": "SLMC-12345",
+  "availability_status": "AVAILABLE",
+  "available_from": "09:00",
+  "available_to": "16:00"
 }
 ```
 
@@ -74,15 +73,15 @@ This is where you take screenshots for the slides!
 
 ## Database
 - **MongoDB Atlas** (cloud)
-- Database: `healthcare_db`
-- Collection: `appointments`
+- Database: `healthcare_doctor_db`
+- Collection: `doctors`
 - Connection is already configured in main.py
 
 ---
 
 ## Folder structure
 ```
-appointment-service/
+doctor-services/
 ├── main.py           ← all the code
 ├── requirements.txt  ← libraries to install
 └── README.md         ← this file

@@ -9,16 +9,16 @@ import uvicorn
 
 # ── App setup ──────────────────────────────────────────────────────────────────
 app = FastAPI(
-    title="Appointment Service",
-    description="Smart Healthcare – Appointment & Patient Management System",
+    title="Doctor Service",
+    description="Smart Healthcare – Doctor Service for CRUD operations",
     version="1.0.0",
 )
 
 # ── MongoDB connection ──────────────────────────────────────────────────────────
 MONGO_URI = "mongodb+srv://Hospital_MTIT:hospital123@cluster0.lnhqemi.mongodb.net/?retryWrites=true&w=majority"
 client = MongoClient(MONGO_URI)
-db = client["healthcare_db"]
-appointments_col = db["appointments"]
+db = client["healthcare_doctor_db"]
+doctors_col = db["doctors"]
 
 # ── Helper ─────────────────────────────────────────────────────────────────────
 def str_to_objectid(id: str) -> ObjectId:
@@ -34,111 +34,94 @@ def serialize(doc) -> dict:
     return doc
 
 # ── Pydantic models ────────────────────────────────────────────────────────────
-class AppointmentCreate(BaseModel):
-    patient_id: str = Field(..., example="p001", description="ID of the patient")
-    doctor_id: str = Field(..., example="d001", description="ID of the doctor")
-    appointment_date: str = Field(..., example="2026-04-10", description="Date (YYYY-MM-DD)")
-    appointment_time: str = Field(..., example="10:30", description="Time (HH:MM)")
-    reason: str = Field(..., example="Routine check-up", description="Reason for visit")
-    status: Optional[str] = Field("scheduled", example="scheduled",
-                                   description="scheduled | completed | cancelled")
+class DoctorCreate(BaseModel):
+    full_name: str = Field(..., example="Dr. Nimal Perera", description="Doctor full name")
+    specialization: str = Field(..., example="Cardiology", description="Doctor specialization")
+    email: str = Field(..., example="nimal.perera@example.com", description="Contact email")
+    phone: str = Field(..., example="0771234567", description="Contact phone number")
+    license_number: str = Field(..., example="SLMC-12345", description="Medical license number")
+    availability_status: Optional[str] = Field("AVAILABLE", example="AVAILABLE",
+                                              description="AVAILABLE | UNAVAILABLE")
+    available_from: Optional[str] = Field("09:00", example="09:00", description="Availability start time")
+    available_to: Optional[str] = Field("16:00", example="16:00", description="Availability end time")
 
-class AppointmentUpdate(BaseModel):
-    patient_id: Optional[str] = Field(None, example="p001")
-    doctor_id: Optional[str] = Field(None, example="d001")
-    appointment_date: Optional[str] = Field(None, example="2026-04-15")
-    appointment_time: Optional[str] = Field(None, example="11:00")
-    reason: Optional[str] = Field(None, example="Follow-up visit")
-    status: Optional[str] = Field(None, example="completed",
-                                   description="scheduled | completed | cancelled")
+class DoctorUpdate(BaseModel):
+    full_name: Optional[str] = Field(None, example="Dr. Nimal Perera")
+    specialization: Optional[str] = Field(None, example="Cardiology")
+    email: Optional[str] = Field(None, example="nimal.perera@example.com")
+    phone: Optional[str] = Field(None, example="0771234567")
+    license_number: Optional[str] = Field(None, example="SLMC-12345")
+    availability_status: Optional[str] = Field(None, example="AVAILABLE")
+    available_from: Optional[str] = Field(None, example="09:00")
+    available_to: Optional[str] = Field(None, example="16:00")
 
 # ── Routes ─────────────────────────────────────────────────────────────────────
 
 @app.get("/", tags=["Health"])
 def root():
-    return {"service": "Appointment Service", "status": "running", "port": 8003}
+    return {"service": "Doctor Service", "status": "running", "port": 8002}
 
 
 # --- CREATE ---
-@app.post("/appointments", tags=["Appointments"], status_code=201)
-def create_appointment(data: AppointmentCreate):
-    """Book a new appointment."""
+@app.post("/doctors", tags=["Doctors"], status_code=201)
+def create_doctor(data: DoctorCreate):
+    """Add a new doctor."""
     doc = data.dict()
     doc["created_at"] = datetime.utcnow().isoformat()
-    result = appointments_col.insert_one(doc)
+    result = doctors_col.insert_one(doc)
     doc["id"] = str(result.inserted_id)
     doc.pop("_id", None)
-    return {"message": "Appointment created successfully", "appointment": doc}
+    return {"message": "Doctor created successfully", "doctor": doc}
 
 
 # --- READ ALL ---
-@app.get("/appointments", tags=["Appointments"])
-def get_all_appointments():
-    """List all appointments."""
-    appointments = [serialize(doc) for doc in appointments_col.find()]
-    return {"total": len(appointments), "appointments": appointments}
+@app.get("/doctors", tags=["Doctors"])
+def get_all_doctors():
+    """List all doctors."""
+    doctors = [serialize(doc) for doc in doctors_col.find()]
+    return {"total": len(doctors), "doctors": doctors}
 
 
 # --- READ ONE ---
-@app.get("/appointments/{appointment_id}", tags=["Appointments"])
-def get_appointment(appointment_id: str):
-    """Get a single appointment by ID."""
-    doc = appointments_col.find_one({"_id": str_to_objectid(appointment_id)})
+@app.get("/doctors/{doctor_id}", tags=["Doctors"])
+def get_doctor(doctor_id: str):
+    """Get a single doctor by ID."""
+    doc = doctors_col.find_one({"_id": str_to_objectid(doctor_id)})
     if not doc:
-        raise HTTPException(status_code=404, detail="Appointment not found")
+        raise HTTPException(status_code=404, detail="Doctor not found")
     return serialize(doc)
 
 
-# --- READ BY PATIENT ---
-@app.get("/appointments/patient/{patient_id}", tags=["Appointments"])
-def get_appointments_by_patient(patient_id: str):
-    """Get all appointments for a specific patient."""
-    docs = [serialize(doc) for doc in appointments_col.find({"patient_id": patient_id})]
-    if not docs:
-        raise HTTPException(status_code=404, detail="No appointments found for this patient")
-    return {"patient_id": patient_id, "total": len(docs), "appointments": docs}
-
-
-# --- READ BY DOCTOR ---
-@app.get("/appointments/doctor/{doctor_id}", tags=["Appointments"])
-def get_appointments_by_doctor(doctor_id: str):
-    """Get all appointments for a specific doctor."""
-    docs = [serialize(doc) for doc in appointments_col.find({"doctor_id": doctor_id})]
-    if not docs:
-        raise HTTPException(status_code=404, detail="No appointments found for this doctor")
-    return {"doctor_id": doctor_id, "total": len(docs), "appointments": docs}
-
-
 # --- UPDATE ---
-@app.put("/appointments/{appointment_id}", tags=["Appointments"])
-def update_appointment(appointment_id: str, data: AppointmentUpdate):
-    """Reschedule or update an appointment."""
+@app.put("/doctors/{doctor_id}", tags=["Doctors"])
+def update_doctor(doctor_id: str, data: DoctorUpdate):
+    """Update doctor details."""
     update_data = {k: v for k, v in data.dict().items() if v is not None}
     if not update_data:
         raise HTTPException(status_code=400, detail="No fields provided to update")
 
     update_data["updated_at"] = datetime.utcnow().isoformat()
-    result = appointments_col.update_one(
-        {"_id": str_to_objectid(appointment_id)},
+    result = doctors_col.update_one(
+        {"_id": str_to_objectid(doctor_id)},
         {"$set": update_data}
     )
     if result.matched_count == 0:
-        raise HTTPException(status_code=404, detail="Appointment not found")
+        raise HTTPException(status_code=404, detail="Doctor not found")
 
-    updated = appointments_col.find_one({"_id": str_to_objectid(appointment_id)})
-    return {"message": "Appointment updated successfully", "appointment": serialize(updated)}
+    updated = doctors_col.find_one({"_id": str_to_objectid(doctor_id)})
+    return {"message": "Doctor updated successfully", "doctor": serialize(updated)}
 
 
 # --- DELETE ---
-@app.delete("/appointments/{appointment_id}", tags=["Appointments"])
-def delete_appointment(appointment_id: str):
-    """Cancel and delete an appointment."""
-    result = appointments_col.delete_one({"_id": str_to_objectid(appointment_id)})
+@app.delete("/doctors/{doctor_id}", tags=["Doctors"])
+def delete_doctor(doctor_id: str):
+    """Delete a doctor."""
+    result = doctors_col.delete_one({"_id": str_to_objectid(doctor_id)})
     if result.deleted_count == 0:
-        raise HTTPException(status_code=404, detail="Appointment not found")
-    return {"message": "Appointment deleted successfully", "id": appointment_id}
+        raise HTTPException(status_code=404, detail="Doctor not found")
+    return {"message": "Doctor deleted successfully", "id": doctor_id}
 
 
 # ── Run ────────────────────────────────────────────────────────────────────────
 if __name__ == "__main__":
-    uvicorn.run("main:app", host="0.0.0.0", port=8003, reload=True)
+    uvicorn.run("main:app", host="0.0.0.0", port=8002, reload=True)
