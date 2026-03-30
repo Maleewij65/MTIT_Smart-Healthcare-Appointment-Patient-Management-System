@@ -10,7 +10,7 @@ import os
 # -----------------------------
 load_dotenv()
 
-MONGODB_URL = os.getenv("MONGODB_URL")
+MONGODB_URL = os.getenv("MONGO_URI")
 DATABASE_NAME = os.getenv("DATABASE_NAME")
 
 # -----------------------------
