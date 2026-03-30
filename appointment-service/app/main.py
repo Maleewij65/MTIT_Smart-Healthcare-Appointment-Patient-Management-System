@@ -52,7 +52,7 @@ def get_appointment(appointment_id: str):
 # --- GET BY PATIENT ---
 @app.get("/appointments/patient/{patient_id}", tags=["Appointments"])
 def get_appointments_by_patient(patient_id: str):
-    """Get all appointments for a specific patient."""
+    """Get all appointments for a specific patients."""
     docs = [serialize(doc) for doc in appointments_col.find({"patient_id": patient_id})]
     if not docs:
         raise HTTPException(status_code=404, detail="No appointments found for this patient")
