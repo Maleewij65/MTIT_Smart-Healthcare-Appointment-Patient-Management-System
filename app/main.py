@@ -71,7 +71,7 @@ def get_patients():
 
 
 # -------------------------------
-# PATIENT STATISTICS (🔥 MOVED UP)
+# PATIENT STATISTICS 
 # -------------------------------
 @app.get("/patients/stats")
 def get_patient_stats():
@@ -102,7 +102,7 @@ def get_patient_stats():
 
 
 # -------------------------------
-# GET PATIENT BY ID (🔥 MOVED DOWN)
+# GET PATIENT BY ID 
 # -------------------------------
 @app.get(
     "/patients/{id}",
