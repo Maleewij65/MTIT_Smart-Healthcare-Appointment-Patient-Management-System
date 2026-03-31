@@ -258,7 +258,7 @@ This project was developed as part of an academic assignment to demonstrate micr
 ## Contributors
 
 Doctor Service – IT22926012
-Patient Service – IT22339324 
+Patient Service – IT22339324
 Appointment Service – IT22187550  
 Prescription Service – IT22222190  
 Billing Service – IT22236128
