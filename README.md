@@ -15,20 +15,6 @@ The system follows a microservices architecture with a single API Gateway acting
 
 Client applications such as web apps, mobile apps, or Postman send requests to the API Gateway, which routes them to the appropriate microservice.
 
-Architecture Flow:
-
-Client Layer  
-        |  
-        v  
-API Gateway (Port 8000)  
-        |  
--------------------------------------------------------------  
-|        |         |         |         |  
-Patient  Doctor  Prescription Appointment Billing  
-Service  Service     Service     Service     Service  
-8001     8002        8003        8004        8005  
-
-Each service maintains its own database to ensure data isolation.
 
 ---
 
