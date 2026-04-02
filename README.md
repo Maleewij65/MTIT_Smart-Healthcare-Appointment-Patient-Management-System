@@ -15,7 +15,7 @@ The system follows a microservices architecture with a single API Gateway acting
 
 Client applications such as web apps, mobile apps, or Postman send requests to the API Gateway, which routes them to the appropriate microservice.
 
-
+All responses from API Gateway : https://drive.google.com/file/d/1scftGlgSKKMG04lvN5VHMFU0u2t15SWb/view?usp=sharing 
 ---
 
 ## Microservices Components
